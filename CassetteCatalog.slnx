@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="CassetteCatalog.Core/CassetteCatalog.Core.csproj" Id="212430cd-4f5a-4301-b729-db5ca81b047a" />
+  <Project Path="CassetteCatalog.Data/CassetteCatalog.Data.csproj" Id="25cc2c12-85c5-4f5a-81b0-6d34c068a04d" />
+  <Project Path="CassetteCatalog.Wpf/CassetteCatalog.Wpf.csproj" Id="e3eeb336-7880-4cab-a2e3-346d4eb37ffb" />
+</Solution>
