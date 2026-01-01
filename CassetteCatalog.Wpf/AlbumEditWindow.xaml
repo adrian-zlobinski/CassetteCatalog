@@ -5,34 +5,70 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CassetteCatalog.Wpf"
         xmlns:conv="clr-namespace:CassetteCatalog.Wpf.Converters"
+        xmlns:localEnums="clr-namespace:CassetteCatalog.Core.Enums;assembly=CassetteCatalog.Core"
+        xmlns:System="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
-        Title="Dodaj nowy album" Height="410" Width="400" WindowStartupLocation="CenterOwner">
+        Title="Dodaj nowy album" Height="360" Width="750" WindowStartupLocation="CenterOwner"
+        WindowStyle="ToolWindow" ResizeMode="NoResize">
     <Window.Resources>
         <conv:TapeTypeToStringConverter x:Key="TapeTypeConverter"/>
+        <ObjectDataProvider x:Key="CassetteSides" MethodName="GetValues" ObjectType="{x:Type System:Type}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="localEnums:eCassetteSide"/>
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
     </Window.Resources>
-    <StackPanel Margin="20">
-        <Label Content="Artysta"/>
-        <TextBox Text="{Binding Artist, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10"/>
-
-        <Label Content="Tytuł:"/>
-        <TextBox Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10"/>
-
-        <Label Content="Rok wydania:"/>
-        <TextBox Text="{Binding ReleaseYear, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10"/>
-        <Label Content="Rodzaj taśmy"/>
-        <ComboBox ItemsSource="{Binding TapeTypes}"
+    <!--Główny kontener  podzielony w pione na dwa. Na górze kontent, na dole przyciski do zapisu i anulowania-->
+    <StackPanel Orientation="Vertical" Name="spMain">
+        <!-- zawartość na dane-->
+        <StackPanel Orientation="Horizontal" Name="spContent">
+            <!--lewa strona z etykietami i polami tekstowymi-->
+            <StackPanel Orientation="Vertical" Margin="5" Width="250">
+                <Label Content="Artysta"/>
+                <TextBox Text="{Binding Artist, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10"/>
+                <Label Content="Tytuł:"/>
+                <TextBox Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10"/>
+                <Label Content="Rok wydania:"/>
+                <TextBox Text="{Binding ReleaseYear, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10"/>
+                <Label Content="Rodzaj taśmy"/>
+                <ComboBox ItemsSource="{Binding TapeTypes}"
                   SelectedItem="{Binding SelectedTapeType}"
                   Margin="0,0,0,10">
-            <ComboBox.ItemTemplate>
-                <DataTemplate>
-                    <TextBlock Text="{Binding Converter={StaticResource TapeTypeConverter}}"/>
-                </DataTemplate>
-            </ComboBox.ItemTemplate>
-        </ComboBox>
-        <Label Content="Nazwa kasety"/>
-        <TextBox Text="{Binding CassetteName, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10"/>
-
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Converter={StaticResource TapeTypeConverter}}"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+                <Label Content="Nazwa kasety"/>
+                <TextBox Text="{Binding CassetteName, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10"/>
+            </StackPanel>
+            <!--prawa strona z listą utworów i przyciskami operacji na utworach-->
+            <StackPanel Orientation="Vertical" Margin="5">
+                <DataGrid ItemsSource="{Binding Tracks}"
+                          SelectedItem="{Binding SelectedTrack}"
+                          AutoGenerateColumns="False"
+                          Height="240">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Nr" Width="40" Binding="{Binding Number}"/>
+                        <DataGridTextColumn Header="Tytuł" Width="300" Binding="{Binding Title, UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
+                        <DataGridTextColumn Header="Czas" Width="60" Binding="{Binding Duration, StringFormat=\{0:mMode\\:sSource\}}"/>
+                        <DataGridComboBoxColumn Header="Strona" 
+                                                ItemsSource="{Binding Source={StaticResource CassetteSides}}"
+                                                Width="50" SelectedItemBinding="{Binding Side}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Name="spTrackButtons" Margin="5">
+                    <Button Content="➕ Dodaj utwór" Margin="0,0,10,0" Padding="2" Command="{Binding AddTrackCommand}"/>
+                    <Button Content="➖ Usuń wybrany" Margin="0,0,10,0" Padding="2" Command="{Binding DeleteTrackCommand}" />
+                    <Button Content="▲" ToolTip="Przesuń w górę" Margin="0,0,10,0" Padding="2" Command="{Binding MoveTrackUpCommand}"/>
+                    <Button Content="▼" ToolTip="Przesuń w dół" Margin="0,0,10,0" Padding="2" Command="{Binding MoveTrackDownCommand}"/>
+                    <Button Content="🗑️ Wyczyść" Padding="2" Command="{Binding DeleteAllTracksCommand}"/>
+                </StackPanel>
+            </StackPanel>
+        </StackPanel>
+        <!-- przyciski zapisu i anulowania-->
+        <StackPanel Orientation="Horizontal" Name="spButtons" HorizontalAlignment="Right" Margin="5">
             <Button Content="Zapisz" Width="80" Margin="0,0,10,0" Command="{Binding SaveCommand}"/>
             <Button Content="Anuluj" Width="80" Command="{Binding CancelCommand}"/>
         </StackPanel>
