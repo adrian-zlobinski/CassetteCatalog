@@ -1,0 +1,40 @@
+﻿<Window x:Class="CassetteCatalog.Wpf.AlbumEditWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CassetteCatalog.Wpf"
+        xmlns:conv="clr-namespace:CassetteCatalog.Wpf.Converters"
+        mc:Ignorable="d"
+        Title="Dodaj nowy album" Height="410" Width="400" WindowStartupLocation="CenterOwner">
+    <Window.Resources>
+        <conv:TapeTypeToStringConverter x:Key="TapeTypeConverter"/>
+    </Window.Resources>
+    <StackPanel Margin="20">
+        <Label Content="Artysta"/>
+        <TextBox Text="{Binding Artist, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10"/>
+
+        <Label Content="Tytuł:"/>
+        <TextBox Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10"/>
+
+        <Label Content="Rok wydania:"/>
+        <TextBox Text="{Binding ReleaseYear, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10"/>
+        <Label Content="Rodzaj taśmy"/>
+        <ComboBox ItemsSource="{Binding TapeTypes}"
+                  SelectedItem="{Binding SelectedTapeType}"
+                  Margin="0,0,0,10">
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding Converter={StaticResource TapeTypeConverter}}"/>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
+        <Label Content="Nazwa kasety"/>
+        <TextBox Text="{Binding CassetteName, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10"/>
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+            <Button Content="Zapisz" Width="80" Margin="0,0,10,0" Command="{Binding SaveCommand}"/>
+            <Button Content="Anuluj" Width="80" Command="{Binding CancelCommand}"/>
+        </StackPanel>
+    </StackPanel>
+</Window>

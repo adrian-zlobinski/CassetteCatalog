@@ -31,7 +31,7 @@ namespace CassetteCatalog.Data.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<byte>("ReleaseYear")
+                    b.Property<ushort>("ReleaseYear")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("TapeType")

@@ -12,7 +12,7 @@ namespace CassetteCatalog.Core.Models
         public int Id { get; set; }
         public string Artist { get; set; }
         public string Title { get; set; }
-        public byte ReleaseYear { get; set; }
+        public ushort ReleaseYear { get; set; }
         public eTapeType TapeType { get; set; }
         public string CassetteName { get; set; } = string.Empty;
         public List<Track> Tracks { get; set; }

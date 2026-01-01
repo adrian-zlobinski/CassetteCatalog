@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using CassetteCatalog.Wpf.ViewModels;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System.Configuration;
 using System.Data;
@@ -24,12 +25,16 @@ namespace CassetteCatalog.Wpf
 
             var dbPath = Path.Combine(appData, "CassetteCatalog.db");
 
-            services.AddDbContext<Data.AppDbContext>(options =>
-            {
-                options.UseSqlite($"Data Source={dbPath}");
-            });
+            services.AddDbContext<Data.AppDbContext>(options => options.UseSqlite($"Data Source={dbPath}"), ServiceLifetime.Singleton);
+
+            services.AddSingleton<MainViewModel>();
+            services.AddSingleton<MainWindow>();
 
             Services = services.BuildServiceProvider();
+
+            var mainWindow = Services.GetRequiredService<MainWindow>();
+            mainWindow.DataContext = Services.GetRequiredService<MainViewModel>();
+            mainWindow.Show();
         }
     }
 
