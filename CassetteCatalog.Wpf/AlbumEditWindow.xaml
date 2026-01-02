@@ -8,11 +8,13 @@
         xmlns:localEnums="clr-namespace:CassetteCatalog.Core.Enums;assembly=CassetteCatalog.Core"
         xmlns:System="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
-        Title="Dodaj nowy album" Height="360" Width="750" WindowStartupLocation="CenterOwner"
-        WindowStyle="ToolWindow" ResizeMode="NoResize">
+        Title="Dodaj nowy album" Height="385" Width="760" WindowStartupLocation="CenterOwner"
+        WindowStyle="SingleBorderWindow"
+        ResizeMode="NoResize">
     <Window.Resources>
         <conv:TapeTypeToStringConverter x:Key="TapeTypeConverter"/>
-        <ObjectDataProvider x:Key="CassetteSides" MethodName="GetValues" ObjectType="{x:Type System:Type}">
+        <conv:TimeSpanToStringConverter x:Key="TimeSpanConverter"/>
+        <ObjectDataProvider x:Key="CassetteSides" MethodName="GetValues" ObjectType="{x:Type System:Enum}">
             <ObjectDataProvider.MethodParameters>
                 <x:Type TypeName="localEnums:eCassetteSide"/>
             </ObjectDataProvider.MethodParameters>
@@ -48,16 +50,38 @@
                 <DataGrid ItemsSource="{Binding Tracks}"
                           SelectedItem="{Binding SelectedTrack}"
                           AutoGenerateColumns="False"
+                          CanUserAddRows="False"
+                          SelectionMode="Single"
+                          SelectionUnit="FullRow"
                           Height="240">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Nr" Width="40" Binding="{Binding Number}"/>
                         <DataGridTextColumn Header="Tytuł" Width="300" Binding="{Binding Title, UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
-                        <DataGridTextColumn Header="Czas" Width="60" Binding="{Binding Duration, StringFormat=\{0:mMode\\:sSource\}}"/>
+                        <DataGridTextColumn Header="Czas" Width="60" Binding="{Binding Duration, Converter={StaticResource TimeSpanConverter}}"/>
                         <DataGridComboBoxColumn Header="Strona" 
                                                 ItemsSource="{Binding Source={StaticResource CassetteSides}}"
-                                                Width="50" SelectedItemBinding="{Binding Side}"/>
+                                                SelectedItemBinding="{Binding Side, UpdateSourceTrigger=PropertyChanged}"
+                                                Width="50">
+                            <DataGridComboBoxColumn.EditingElementStyle>
+                                <Style TargetType="ComboBox">
+                                    <Setter Property="IsDropDownOpen" Value="True"/>
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
+
+                                </Style>
+                            </DataGridComboBoxColumn.EditingElementStyle>
+                        </DataGridComboBoxColumn>
                     </DataGrid.Columns>
                 </DataGrid>
+                <StackPanel Orientation="Horizontal" Height="30">
+                    <Label Content="Łączny czas:" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding TotalDurationFormatted}" VerticalAlignment="Center" FontWeight="Bold" Margin="5,0,0,0"/>
+                    <Label Content=" | Utworów:" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding TrackCount}" VerticalAlignment="Center" FontWeight="Bold" Margin="5,0,0,0"/>
+                    <Label Content="Czas strony A" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding SideADurationFormatted}" VerticalAlignment="Center" FontWeight="Bold" Margin="5,0,0,0"/>
+                    <Label Content="Czas strony B" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding SideBDurationFormatted}" VerticalAlignment="Center" FontWeight="Bold" Margin="5,0,0,0"/>
+                </StackPanel>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Name="spTrackButtons" Margin="5">
                     <Button Content="➕ Dodaj utwór" Margin="0,0,10,0" Padding="2" Command="{Binding AddTrackCommand}"/>
                     <Button Content="➖ Usuń wybrany" Margin="0,0,10,0" Padding="2" Command="{Binding DeleteTrackCommand}" />

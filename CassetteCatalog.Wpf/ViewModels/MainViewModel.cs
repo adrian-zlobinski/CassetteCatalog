@@ -83,7 +83,7 @@ namespace CassetteCatalog.Wpf.ViewModels
                     ReleaseYear = editVm.ReleaseYear,
                     TapeType = editVm.SelectedTapeType,
                     CassetteName = editVm.CassetteName,
-                    Tracks = new List<Track>()
+                    Tracks = editVm.Tracks.Select(tvm => tvm.TrackModel).ToList()
                 };
 
                 // 2. Zapis do bazy danych (tu album otrzymuje swoje unikalne Id)
@@ -122,33 +122,78 @@ namespace CassetteCatalog.Wpf.ViewModels
             var dbAlbum = _dbContext.Albums
                 .Include(a => a.Tracks)
                 .FirstOrDefault(a => a.Id == SelectedAlbum.Id);
-            if (dbAlbum != null)
-            {
-                // Tutaj logika aktualizacji pól, np.:
-                // dbAlbum.Title = "Nowy Tytuł";
-                dbAlbum.Title = "Zmieniony tytuł";
-                if(dbAlbum.Tracks == null)
-                {
-                    dbAlbum.Tracks = new List<Track>();
-                }
-                dbAlbum.Tracks.Add(new Track()
-                {
-                    Id = 0,
-                    Duration = new TimeSpan(0, 3, 3),
-                    Title = "Ścieżka",
-                    Side = eCassetteSide.A,
-                    Number = 1
 
-                });
+            if (dbAlbum == null) return;
+
+            var editVm = new AlbumEditViewModel();
+            editVm.Artist = dbAlbum.Artist;
+            editVm.Title = dbAlbum.Title;
+            editVm.ReleaseYear = dbAlbum.ReleaseYear;
+            editVm.CassetteName = dbAlbum.CassetteName;
+            editVm.SelectedTapeType = dbAlbum.TapeType;
+            foreach(var track in dbAlbum.Tracks.OrderBy(t => t.Number))
+            {
+                editVm.Tracks.Add(new TrackViewModel(track));
+            }
+
+            var window = new AlbumEditWindow { DataContext = editVm, Owner = App.Current.MainWindow };
+
+            if (window.ShowDialog() == true)
+            {
+                string oldArtist = dbAlbum.Artist;
+
+                dbAlbum.Artist = editVm.Artist;
+                dbAlbum.Title = editVm.Title;
+                dbAlbum.ReleaseYear = editVm.ReleaseYear;
+                dbAlbum.CassetteName = editVm.CassetteName;
+                dbAlbum.TapeType = editVm.SelectedTapeType;
+                // Aktualizacja listy utworów
+                dbAlbum.Tracks.Clear();
+                foreach (var trackVm in editVm.Tracks)
+                {
+                    dbAlbum.Tracks.Add(trackVm.TrackModel);
+                }
 
                 _dbContext.SaveChanges();
 
-                // Powiadomienie UI o zmianie (zakładając Refresh() w AlbumNode)
-                var node = Artists.SelectMany(a => a.Albums)
-                                          .FirstOrDefault(n => n.Album.Id == SelectedAlbum.Id); node?.Refresh();
-                // Ważne: Jeśli masz widok szczegółowy po prawej stronie, 
-                // powinieneś też powiadomić o zmianie we właściwości SelectedAlbum
-                OnPropertyChanged(nameof(SelectedAlbum));
+                if(oldArtist.Equals(dbAlbum.Artist, StringComparison.OrdinalIgnoreCase))
+                {
+                    var artistNode = Artists.FirstOrDefault(a => a.Name.Equals(dbAlbum.Artist, StringComparison.OrdinalIgnoreCase));
+                    var albumNode = artistNode?.Albums.FirstOrDefault(a => a.Album.Id == dbAlbum.Id);
+                    albumNode?.Refresh(dbAlbum);
+                }
+                else
+                {
+                    MoveAlbumInTree(dbAlbum, oldArtist);
+                }
+            }
+        }
+
+        private void MoveAlbumInTree(Album album, string oldArtistName)
+        {
+            var oldArtistNode = Artists.FirstOrDefault(a => a.Name.Equals(oldArtistName, StringComparison.OrdinalIgnoreCase));
+            if (oldArtistName != null)
+            {
+                var albumNode = oldArtistNode.Albums.FirstOrDefault(a => a.Album.Id == album.Id);
+                if (albumNode != null)
+                {
+                    oldArtistNode.Albums.Remove(albumNode);
+                }
+                if (!oldArtistNode.Albums.Any())
+                {
+                    Artists.Remove(oldArtistNode);
+                }
+            }
+            var newArtistNode = Artists.FirstOrDefault(a => a.Name.Equals(album.Artist, StringComparison.OrdinalIgnoreCase));
+            if(newArtistNode != null)
+            {
+                newArtistNode.Albums.Add(new AlbumNode(album));
+            }
+            else
+            {
+                var newArtist = new ArtistNode(album.Artist, new List<Album> { album });
+                var index = Artists.TakeWhile(a => string.Compare(a.Name, album.Artist, StringComparison.OrdinalIgnoreCase) < 0).Count();
+                Artists.Insert(index, newArtist);
             }
         }
         private void DeleteAlbum()
@@ -171,15 +216,22 @@ namespace CassetteCatalog.Wpf.ViewModels
 
         private void RemoveAlbumFromView(int albumId)
         {
-            foreach (var artist in Artists)
+            // 1. Znajdź artystę, u którego jest ten album
+            var artistNode = Artists.FirstOrDefault(a => a.Albums.Any(alb => alb.Album.Id == albumId));
+
+            if (artistNode != null)
             {
-                var albumNode = artist.Albums.FirstOrDefault(a => a.Album.Id == albumId);
+                // 2. Znajdź i usuń album
+                var albumNode = artistNode.Albums.FirstOrDefault(a => a.Album.Id == albumId);
                 if (albumNode != null)
                 {
-                    artist.Albums.Remove(albumNode);
-                    // Jeśli artysta nie ma już albumów, możesz go też usunąć z drzewa
-                    if (artist.Albums.Count == 0) Artists.Remove(artist);
-                    break;
+                    artistNode.Albums.Remove(albumNode);
+                }
+
+                // 3. Jeśli artysta jest pusty, usuń go z głównej listy
+                if (artistNode.Albums.Count == 0)
+                {
+                    Artists.Remove(artistNode);
                 }
             }
         }
