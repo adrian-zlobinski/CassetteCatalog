@@ -8,7 +8,7 @@
         xmlns:localEnums="clr-namespace:CassetteCatalog.Core.Enums;assembly=CassetteCatalog.Core"
         xmlns:System="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
-        Title="Dodaj nowy album" Height="385" Width="760" WindowStartupLocation="CenterOwner"
+        Title="{Binding WindowTitle}" Height="385" Width="760" WindowStartupLocation="CenterOwner"
         WindowStyle="SingleBorderWindow"
         ResizeMode="NoResize">
     <Window.Resources>

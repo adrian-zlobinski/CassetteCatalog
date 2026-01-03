@@ -14,11 +14,32 @@ namespace CassetteCatalog.Wpf.ViewModels
         private TimeSpan SideADuration => TimeSpan.FromTicks(Tracks.Where(t => t.Side == eCassetteSide.A).Sum(t => t.Duration.Ticks));
         private TimeSpan SideBDuration => TimeSpan.FromTicks(Tracks.Where(t => t.Side == eCassetteSide.B).Sum(t => t.Duration.Ticks));
         private TimeSpan TotalDuration => TimeSpan.FromTicks(Tracks.Sum(t => t.Duration.Ticks));
+        private string _artist;
+        private string _title;
         #endregion
 
         #region GUI Variables
-        public string Artist { get; set; } = "Nowy Artysta";
-        public string Title { get; set; } = "Nowy Tytuł";
+        public string Artist 
+        { 
+            get => _artist;
+            set 
+            {
+                _artist = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(WindowTitle));
+            } 
+        }
+        public string Title 
+        { 
+            get => _title; 
+            set
+            {
+                _title = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(WindowTitle));
+            }
+        }
+        public string WindowTitle => $"Album: {Artist} - {Title}";
         public ushort ReleaseYear { get; set; } = (ushort)DateTime.Now.Year;
         public string CassetteName { get; set; } = "No name";
         public eTapeType SelectedTapeType { get; set; } = eTapeType.TypeI_Fe;
