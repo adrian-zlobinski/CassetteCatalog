@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -40,8 +41,15 @@ namespace CassetteCatalog.Wpf.ViewModels
             }
         }
 
+        public string AppTitle { get; }
+        public string FooterInfo { get; }
+
         public MainViewModel(AppDbContext dbContext)
         {
+            var version = Assembly.GetEntryAssembly()?.GetName().Version;
+            var author = Assembly.GetEntryAssembly()?.GetCustomAttribute<AssemblyCompanyAttribute>()?.Company;
+            AppTitle = $"Cassette Albums Catalog v{version}";
+            FooterInfo = $"© 2026 {author}";
             _dbContext = dbContext;
             AddAlbumCommand = new RelayCommand(AddAlbum);
             EditAlbumCommand = new RelayCommand(EditAlbum, () => SelectedAlbum != null);

@@ -6,43 +6,51 @@
         xmlns:local="clr-namespace:CassetteCatalog.Wpf"
         xmlns:vm="clr-namespace:CassetteCatalog.Wpf.ViewModels"
         mc:Ignorable="d"
-        Title="Katalog kaset" Height="450" Width="800">
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="240"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
-        <Grid Grid.Column="0">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
-            <TreeView ItemsSource="{Binding Artists}" Grid.Row="0">
-                <TreeView.Resources>
-                    <DataTemplate DataType="{x:Type vm:AlbumNode}">
-                        <TextBlock Text="{Binding Title}"/>
-                    </DataTemplate>
-                    <HierarchicalDataTemplate DataType="{x:Type vm:ArtistNode}"
-                                              ItemsSource="{Binding Albums}">
-                        <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
-                    </HierarchicalDataTemplate>
-                </TreeView.Resources>
-                <TreeView.ItemContainerStyle>
-                    <Style TargetType="TreeViewItem">
-                        <EventSetter Event="Selected" Handler="TreeViewItem_Selected" />
-                    </Style>
-                </TreeView.ItemContainerStyle>
+        Title="{Binding AppTitle}" Height="450" Width="800">
+    <DockPanel>
+        <StatusBar DockPanel.Dock="Bottom">
+            <StatusBarItem HorizontalAlignment="Right" Margin="0,0,5,0">
+                <TextBlock Text="{Binding FooterInfo}" FontSize="10" Foreground="Gray"/>
+            </StatusBarItem>
+        </StatusBar>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="240"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TreeView ItemsSource="{Binding Artists}" Grid.Row="0">
+                    <TreeView.Resources>
+                        <DataTemplate DataType="{x:Type vm:AlbumNode}">
+                            <TextBlock Text="{Binding Title}"/>
+                        </DataTemplate>
+                        <HierarchicalDataTemplate DataType="{x:Type vm:ArtistNode}"
+                                                  ItemsSource="{Binding Albums}">
+                            <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
+                        </HierarchicalDataTemplate>
+                    </TreeView.Resources>
+                    <TreeView.ItemContainerStyle>
+                        <Style TargetType="TreeViewItem">
+                            <EventSetter Event="Selected" Handler="TreeViewItem_Selected" />
+                        </Style>
+                    </TreeView.ItemContainerStyle>
 
-            </TreeView>
-            <StackPanel Grid.Row="1"
-                        Orientation="Horizontal"
-                        HorizontalAlignment="Center"
-                        Margin="3">
-                <Button Content="Dodaj" Width="70" Margin="3" Command="{Binding AddAlbumCommand}"/>
-                <Button Content="Edytuj" Width="70" Margin="3" Command="{Binding EditAlbumCommand}"/>
-                <Button Content="Usuń" Width="70" Margin="3" Command="{Binding DeleteAlbumCommand}"/>
-            </StackPanel>
+                </TreeView>
+                <StackPanel Grid.Row="1"
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Center"
+                            Margin="3">
+                    <Button Content="Dodaj" Width="70" Margin="3" Command="{Binding AddAlbumCommand}"/>
+                    <Button Content="Edytuj" Width="70" Margin="3" Command="{Binding EditAlbumCommand}"/>
+                    <Button Content="Usuń" Width="70" Margin="3" Command="{Binding DeleteAlbumCommand}"/>
+                </StackPanel>
+            </Grid>
+            <ContentControl Grid.Column="1"/>
         </Grid>
-        <ContentControl Grid.Column="1"/>
-    </Grid>
+    </DockPanel>
+
 </Window>
