@@ -9,6 +9,10 @@
 	<Version>1.0.0.0</Version>
 	<Authors>Adrian Żłobiński - adrian-zlobinski@tlen.pl</Authors>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="12.1.1" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CassetteCatalog.Core\CassetteCatalog.Core.csproj" />
     <ProjectReference Include="..\CassetteCatalog.Data\CassetteCatalog.Data.csproj" />
