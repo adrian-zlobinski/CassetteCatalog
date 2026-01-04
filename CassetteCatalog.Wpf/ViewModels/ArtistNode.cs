@@ -19,7 +19,7 @@ namespace CassetteCatalog.Wpf.ViewModels
         {
             Name = name;
             Albums = new ObservableCollection<AlbumNode>(
-                albums.Select(a=> new AlbumNode(a)));
+                albums.OrderBy(a=>a.Title, StringComparer.CurrentCultureIgnoreCase).Select(a=> new AlbumNode(a)));
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
