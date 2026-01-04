@@ -1,5 +1,6 @@
 ﻿using CassetteCatalog.Core.Enums;
 using CassetteCatalog.Core.Models;
+using CassetteCatalog.Wpf.Validators;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -7,18 +8,32 @@ using System.Windows.Input;
 
 namespace CassetteCatalog.Wpf.ViewModels
 {
-    public class AlbumEditViewModel : INotifyPropertyChanged
+    public class AlbumEditViewModel : INotifyPropertyChanged, IDataErrorInfo
     {
         #region Local Variables
+        private readonly AlbumValidator _validator = new AlbumValidator();
         private TrackViewModel? _selectedTrack;
         private TimeSpan SideADuration => TimeSpan.FromTicks(Tracks.Where(t => t.Side == eCassetteSide.A).Sum(t => t.Duration.Ticks));
         private TimeSpan SideBDuration => TimeSpan.FromTicks(Tracks.Where(t => t.Side == eCassetteSide.B).Sum(t => t.Duration.Ticks));
         private TimeSpan TotalDuration => TimeSpan.FromTicks(Tracks.Sum(t => t.Duration.Ticks));
         private string _artist;
         private string _title;
+        private ushort _releaseYear;
         #endregion
 
         #region GUI Variables
+        public string Error => null;
+        public string this[string columnName]
+        {
+            get
+            {
+                var result = _validator.Validate(this);
+                if (result.IsValid)
+                    return null;
+                var error = result.Errors.FirstOrDefault(x => x.PropertyName == columnName);
+                return error?.ErrorMessage;
+            }
+        }
         public string Artist 
         { 
             get => _artist;
@@ -27,6 +42,8 @@ namespace CassetteCatalog.Wpf.ViewModels
                 _artist = value;
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(WindowTitle));
+                OnPropertyChanged(nameof(Error));
+                ((RelayCommand)SaveCommand).RaiseCanExecuteChanged();
             } 
         }
         public string Title 
@@ -37,10 +54,21 @@ namespace CassetteCatalog.Wpf.ViewModels
                 _title = value;
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(WindowTitle));
+                OnPropertyChanged(nameof(Error));
+                ((RelayCommand)SaveCommand).RaiseCanExecuteChanged();
             }
         }
         public string WindowTitle => $"Album: {Artist} - {Title}";
-        public ushort ReleaseYear { get; set; } = (ushort)DateTime.Now.Year;
+        public ushort ReleaseYear { 
+            get => _releaseYear; 
+            set 
+            { 
+                _releaseYear = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(Error));
+                ((RelayCommand)SaveCommand).RaiseCanExecuteChanged();
+            }
+        }
         public string CassetteName { get; set; } = "No name";
         public eTapeType SelectedTapeType { get; set; } = eTapeType.TypeI_Fe;
         public IEnumerable<eTapeType> TapeTypes => Enum.GetValues(typeof(eTapeType)).Cast<eTapeType>();
@@ -82,11 +110,11 @@ namespace CassetteCatalog.Wpf.ViewModels
 
         public AlbumEditViewModel()
         {
-            SaveCommand = new RelayCommand(Save);
+            SaveCommand = new RelayCommand(Save, () =>_validator.Validate(this).IsValid);
             CancelCommand = new RelayCommand(Cancel);
             AddTrackCommand = new RelayCommand(AddTrack);
             DeleteTrackCommand = new RelayCommand(DeleteTrack, () => SelectedTrack != null);
-            DeleteAllTracksCommand = new RelayCommand(() => Tracks.Clear(), () => Tracks.Any());
+            DeleteAllTracksCommand = new RelayCommand(DeleteAllTracks, () => Tracks.Any());
             MoveTrackUpCommand = new RelayCommand(MoveTrackUp, CanMoveTrackUp);
             MoveTrackDownCommand = new RelayCommand(MoveTrackDown, CanMoveTrackDown);
 
@@ -118,11 +146,7 @@ namespace CassetteCatalog.Wpf.ViewModels
         }
         private void Track_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(TrackViewModel.Duration) ||
-                e.PropertyName == nameof(TrackViewModel.Side))
-            {
-                RefreshTotals();                
-            }
+            RefreshTotals();                
         }
 
         private bool CanMoveTrackUp()
@@ -134,6 +158,13 @@ namespace CassetteCatalog.Wpf.ViewModels
         {
             if (SelectedTrack == null) return false;
             return Tracks.IndexOf(SelectedTrack) < Tracks.Count - 1;
+        }
+
+        private void DeleteAllTracks()
+        {
+            Tracks.Clear();
+            ((RelayCommand)DeleteAllTracksCommand).RaiseCanExecuteChanged();
+            ((RelayCommand)SaveCommand).RaiseCanExecuteChanged();
         }
         private void AddTrack()
         {
@@ -205,6 +236,7 @@ namespace CassetteCatalog.Wpf.ViewModels
             OnPropertyChanged(nameof(SideBDurationFormatted));
             OnPropertyChanged(nameof(TotalDurationFormatted));
             OnPropertyChanged(nameof(TrackCount));
+            ((RelayCommand)SaveCommand).RaiseCanExecuteChanged();
         }
         protected void OnPropertyChanged([CallerMemberName] string? name = null)
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));

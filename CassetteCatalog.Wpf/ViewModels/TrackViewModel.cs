@@ -1,12 +1,26 @@
 ﻿using CassetteCatalog.Core.Enums;
 using CassetteCatalog.Core.Models;
+using CassetteCatalog.Wpf.Validators;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
 namespace CassetteCatalog.Wpf.ViewModels
 {
-    public class TrackViewModel : INotifyPropertyChanged
+    public class TrackViewModel : INotifyPropertyChanged, IDataErrorInfo
     {
+        private readonly TrackValidator _validator = new TrackValidator();
+        public string Error => null;
+        public string this[string columnName]
+        {
+            get
+            {
+                var result = _validator.Validate(this);
+                if(result.IsValid)
+                    return null;
+                var error = result.Errors.FirstOrDefault(x => x.PropertyName == columnName);
+                return error?.ErrorMessage;
+            }
+        }
         public Track TrackModel { get; }
 
         public TrackViewModel(Track track)
