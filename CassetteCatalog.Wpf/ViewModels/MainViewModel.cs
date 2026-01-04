@@ -61,7 +61,7 @@ namespace CassetteCatalog.Wpf.ViewModels
         private void LoadTree()
         {
             var albums = _dbContext.Albums.AsNoTracking().ToList();
-            var groups = albums.GroupBy(a => a.Artist).OrderBy(g => g.Key);
+            var groups = albums.GroupBy(a => a.Artist).OrderBy(g => g.Key, StringComparer.CurrentCultureIgnoreCase);
 
             Artists.Clear();
 
@@ -107,6 +107,12 @@ namespace CassetteCatalog.Wpf.ViewModels
                     // Artysta istnieje - dodajemy album do jego kolekcji
                     var albumNode = new AlbumNode(newAlbum);
                     artistNode.Albums.Add(albumNode);
+                    var sortedAlbums = artistNode.Albums.OrderBy(a => a.Title).ToList();
+                    artistNode.Albums.Clear();
+                    foreach (var album in sortedAlbums)
+                    {
+                        artistNode.Albums.Add(album);
+                    }
                 }
                 else
                 {
