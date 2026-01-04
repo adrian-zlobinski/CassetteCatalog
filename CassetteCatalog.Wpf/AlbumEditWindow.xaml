@@ -19,7 +19,7 @@
                 <x:Type TypeName="localEnums:eCassetteSide"/>
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
-        <Style TargetType="TextBox" x:Key="ValidationTextBox">
+        <Style TargetType="TextBox" x:Key="TextBoxWithValidation">
             <Style.Triggers>
                 <Trigger Property="Validation.HasError" Value="True">
                     <Setter Property="ToolTip"
@@ -37,11 +37,11 @@
             <!--lewa strona z etykietami i polami tekstowymi-->
             <StackPanel Orientation="Vertical" Margin="5" Width="250">
                 <Label Content="Artysta"/>
-                <TextBox Text="{Binding Artist, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True, NotifyOnValidationError=True}" Margin="0,0,0,10" Style="{StaticResource ValidationTextBox}"/>
+                <TextBox Text="{Binding Artist, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True, NotifyOnValidationError=True}" Margin="0,0,0,10" Style="{StaticResource TextBoxWithValidation}"/>
                 <Label Content="Tytuł:"/>
-                <TextBox Text="{Binding Title, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=true, NotifyOnValidationError=True}" Margin="0,0,0,10" Style="{StaticResource ValidationTextBox}"/>
+                <TextBox Text="{Binding Title, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=true, NotifyOnValidationError=True}" Margin="0,0,0,10" Style="{StaticResource TextBoxWithValidation}"/>
                 <Label Content="Rok wydania:"/>
-                <TextBox Text="{Binding ReleaseYear, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=true, ValidatesOnExceptions=True, NotifyOnValidationError=True}" Margin="0,0,0,10" Style="{StaticResource ValidationTextBox}"/>
+                <TextBox Text="{Binding ReleaseYear, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=true, ValidatesOnExceptions=True, NotifyOnValidationError=True}" Margin="0,0,0,10" Style="{StaticResource TextBoxWithValidation}"/>
                 <Label Content="Rodzaj taśmy"/>
                 <ComboBox ItemsSource="{Binding TapeTypes}"
                   SelectedItem="{Binding SelectedTapeType}"
@@ -64,19 +64,50 @@
                           SelectionMode="Single"
                           SelectionUnit="FullRow"
                           Height="240">
+                    <DataGrid.Resources>
+                        <Style x:Key="GridTextBlockWithValidation" TargetType="TextBlock">
+                            <Style.Triggers>
+                                <Trigger Property="Validation.HasError" Value="True">
+                                    <Setter Property="Background" Value="Red"/>
+                                    <Setter Property="ToolTip" Value="{Binding RelativeSource={RelativeSource Self}, Path=(Validation.Errors)[0].ErrorContent}"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                        <Style x:Key="GridTextBoxWithWalidation" TargetType="TextBox">
+                            <Setter Property="Validation.ErrorTemplate">
+                                <Setter.Value>
+                                    <ControlTemplate>
+                                        <Border BorderBrush="Red" BorderThickness="1">
+                                            <AdornedElementPlaceholder/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </DataGrid.Resources>
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Nr" Width="40" Binding="{Binding Number}"/>
-                        <DataGridTextColumn Header="Tytuł" Width="300" Binding="{Binding Title, UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
-                        <DataGridTextColumn Header="Czas" Width="60" Binding="{Binding Duration, Converter={StaticResource TimeSpanConverter}}"/>
+                        <DataGridTextColumn Header="Tytuł" 
+                                            Width="300" 
+                                            Binding="{Binding Title, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
+                                            ElementStyle="{StaticResource GridTextBlockWithValidation}"/>
+                        <DataGridTextColumn Header="Czas" 
+                                            Width="60" 
+                                            Binding="{Binding Duration, Converter={StaticResource TimeSpanConverter}, ValidatesOnDataErrors=True}"
+                                            ElementStyle="{StaticResource GridTextBlockWithValidation}"/>
                         <DataGridComboBoxColumn Header="Strona" 
                                                 ItemsSource="{Binding Source={StaticResource CassetteSides}}"
-                                                SelectedItemBinding="{Binding Side, UpdateSourceTrigger=PropertyChanged}"
+                                                SelectedItemBinding="{Binding Side, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
                                                 Width="50">
                             <DataGridComboBoxColumn.EditingElementStyle>
                                 <Style TargetType="ComboBox">
                                     <Setter Property="IsDropDownOpen" Value="True"/>
                                     <Setter Property="VerticalAlignment" Value="Center"/>
-
+                                    <Style.Triggers>
+                                        <Trigger Property="Validation.HasError" Value="True">
+                                            <Setter Property="ToolTip" Value="{Binding RelativeSource={RelativeSource Self}, Path=(Validation.Errors)[0].ErrorContent}"/>
+                                        </Trigger>
+                                    </Style.Triggers>
                                 </Style>
                             </DataGridComboBoxColumn.EditingElementStyle>
                         </DataGridComboBoxColumn>

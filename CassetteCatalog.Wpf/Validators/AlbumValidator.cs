@@ -16,6 +16,8 @@ namespace CassetteCatalog.Wpf.Validators
                 .LessThanOrEqualTo((ushort)DateTime.Now.Year).WithMessage("Rok wydania nie może być z przyszłości");
 
             RuleFor(x => x.Tracks).Must(x => x.Count > 0).WithMessage("Album musie mieć przynajmniej jeden utwór");
+
+            RuleForEach(x=>x.Tracks).SetValidator(new TrackValidator());
         }
     }
 }

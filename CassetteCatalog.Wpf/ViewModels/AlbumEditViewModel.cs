@@ -114,7 +114,7 @@ namespace CassetteCatalog.Wpf.ViewModels
             CancelCommand = new RelayCommand(Cancel);
             AddTrackCommand = new RelayCommand(AddTrack);
             DeleteTrackCommand = new RelayCommand(DeleteTrack, () => SelectedTrack != null);
-            DeleteAllTracksCommand = new RelayCommand(() => Tracks.Clear(), () => Tracks.Any());
+            DeleteAllTracksCommand = new RelayCommand(DeleteAllTracks, () => Tracks.Any());
             MoveTrackUpCommand = new RelayCommand(MoveTrackUp, CanMoveTrackUp);
             MoveTrackDownCommand = new RelayCommand(MoveTrackDown, CanMoveTrackDown);
 
@@ -146,11 +146,7 @@ namespace CassetteCatalog.Wpf.ViewModels
         }
         private void Track_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(TrackViewModel.Duration) ||
-                e.PropertyName == nameof(TrackViewModel.Side))
-            {
-                RefreshTotals();                
-            }
+            RefreshTotals();                
         }
 
         private bool CanMoveTrackUp()
@@ -162,6 +158,13 @@ namespace CassetteCatalog.Wpf.ViewModels
         {
             if (SelectedTrack == null) return false;
             return Tracks.IndexOf(SelectedTrack) < Tracks.Count - 1;
+        }
+
+        private void DeleteAllTracks()
+        {
+            Tracks.Clear();
+            ((RelayCommand)DeleteAllTracksCommand).RaiseCanExecuteChanged();
+            ((RelayCommand)SaveCommand).RaiseCanExecuteChanged();
         }
         private void AddTrack()
         {
@@ -233,6 +236,7 @@ namespace CassetteCatalog.Wpf.ViewModels
             OnPropertyChanged(nameof(SideBDurationFormatted));
             OnPropertyChanged(nameof(TotalDurationFormatted));
             OnPropertyChanged(nameof(TrackCount));
+            ((RelayCommand)SaveCommand).RaiseCanExecuteChanged();
         }
         protected void OnPropertyChanged([CallerMemberName] string? name = null)
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
