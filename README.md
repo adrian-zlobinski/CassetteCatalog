@@ -1,6 +1,6 @@
-# CassetteCatalog 📼
+# Compact Cassette Recordings Catalog (C.C.R.C)📼
 
-**CassetteCatalog** to intuicyjna aplikacja desktopowa stworzona dla pasjonatów analogowych nośników, służąca do zarządzania kolekcją kaset magnetofonowych. Pozwala na szczegółowe katalogowanie albumów, utworów oraz monitorowanie czasów trwania poszczególnych stron nośnika.
+** Compact Cassette Recordings Catalog (skr. C.C.R.C.)** to intuicyjna aplikacja desktopowa stworzona dla pasjonatów analogowych nośników, służąca do zarządzania kolekcją kaset magnetofonowych. Pozwala na szczegółowe katalogowanie albumów, utworów oraz monitorowanie czasów trwania poszczególnych stron nośnika.
 
 ## 🚀 Możliwości programu
 
